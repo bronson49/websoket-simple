@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport"
+         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <title>Title</title>
+
+</head>
+<body>
+<!-- форма сообщений -->
+<form name="publish">
+   <input type="text" name="message">
+   <input type="submit" value="Отправить">
+</form>
+
+<!-- div с сообщениями -->
+<div id="messages"></div>
+
+<script>
+    let socket = new WebSocket("ws://localhost:8080");
+    let userName= +new Date();
+
+    // отправка сообщения из формы
+    document.forms.publish.onsubmit = function() {
+        let outgoingMessage = this.message.value;
+
+        let sendOpt = {
+            userName,
+            msg: outgoingMessage,
+        };
+        socket.send(JSON.stringify(sendOpt));
+        return false;
+    };
+
+    // получение сообщения - отобразить данные в div#messages
+    socket.onmessage = function(event) {
+        let message = JSON.parse(event.data);
+
+        let messageElem = document.createElement('div');
+        messageElem.textContent = message.userName+': '+message.msg;
+        document.getElementById('messages').prepend(messageElem);
+    }
+</script>
+</body>
+</html>
